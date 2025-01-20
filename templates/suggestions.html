@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggestions</title>
+</head>
+<body>
+    <h1>Food Suggestions</h1>
+    <form action="/suggestions" method="POST">
+        <label for="country">Country:</label>
+        <input type="text" name="country" required>
+        <br>
+        <label for="meal_type">Meal Type (Breakfast/Lunch/Dinner):</label>
+        <input type="text" name="meal_type" required>
+        <br>
+        <button type="submit">Get Suggestions</button>
+    </form>
+
+    <h2>Suggested Recipes</h2>
+    {% if foods %}
+        <ul>
+        {% for food in foods %}
+            <li>{{ food.title }}
+                <form action="/add_favorite" method="POST" style="display:inline;">
+                    <input type="hidden" name="food_name" value="{{ food.title }}">
+                    <button type="submit">Add to Favorites</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No suggestions available.</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+</head>
+<body>
+    <h1>Your Notes</h1>
+    <form action="/add_note" method="POST">
+        <label for="note">Add a Note:</label>
+        <textarea name="note" required></textarea>
+        <br>
+        <button type="submit">Add Note</button>
+    </form>
+
+    <ul>
+    {% for note in notes %}
+        <li>{{ note[0] }}
+            <form action="/delete_note" method="POST" style="display:inline;">
+                <input type="hidden" name="note" value="{{ note[0] }}">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    {% else %}
+        <li>No notes available.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
