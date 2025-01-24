@@ -4,14 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; /* Yazı tipi */
+            text-align: center; /* Sayfanın tamamını ortala */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Sayfa yüksekliğini tam doldur */
+        }
+        h1 {
+            font-size: 3rem; /* Başlık büyüklüğünü arttır */
+            margin-bottom: 30px; /* Başlık ile menü arasında boşluk */
+        }
+        nav {
+            display: flex;
+            justify-content: center; /* Menü öğelerini yatayda ortala */
+            gap: 20px; /* Menü öğeleri arasındaki boşluk */
+        }
+        nav a {
+            font-size: 1.5rem; /* Menü bağlantılarını büyüt */
+            text-decoration: none; /* Alt çizgi kaldır */
+            color: #333; /* Metin rengini koyu yap */
+            padding: 10px 20px; /* Bağlantıların iç boşluklarını ayarla */
+            border-radius: 5px; /* Köşeleri yuvarlat */
+            transition: background-color 0.3s ease; /* Hover efektinin geçiş süresi */
+        }
+        nav a:hover {
+            background-color: #ddd; /* Hover durumunda arka plan rengi değişsin */
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Food App</h1>
+    <h1>Welcome to the Secret Kebab</h1>
     <nav>
-        <a href="/kebabs">Kebabs</a> |
-        <a href="/suggestions">Suggestions</a> |
-        <a href="/favorites">Favorites</a> |
-        <a href="/notes">Notes</a> |
+        <a href="/kebabs">Kebabs</a>
+        <a href="/suggestions">Suggestions</a>
+        <a href="/favorites">Favorites</a>
+        <a href="/notes">Notes</a>
         <a href="/logout">Logout</a>
     </nav>
 </body>
