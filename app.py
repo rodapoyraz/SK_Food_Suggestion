@@ -92,7 +92,7 @@ def get_food_suggestions(country=None, meal_type=None, diet=None, ingredients=No
 
 @app.route('/')
 def login():
-    return render_template('login.html')
+    return render_template('index.html')
 
 
 @app.route('/login', methods=['POST'])
