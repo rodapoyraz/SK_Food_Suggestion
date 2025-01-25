@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Flask App</title>
+    <title>Secret Kebab</title>
 </head>
 <body>
-    <!-- Head -->
-    <h1>WELCOME TO SECRET KEBAB</h1>
+    <!-- Header -->
+    <h1 style="text-align: center;">WELCOME TO SECRET KEBAB</h1>
 
-    <!-- Image Part -->
+    <!-- Image Section -->
     <img src="{{ url_for('static', filename='images/SecretKebab.jpg') }}"
          alt="Secret Kebab Image"
          style="max-width: 100%; height: auto; margin: auto; display: block;">
 
-    <!-- Login Part-->
-    <div style="display: flex; justify-content: center; align-items: center; height: 1vh; flex-direction: column; margin-top: -90px;">
+    <!-- Login Section -->
+    <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: -70px;">
         <h2>Login</h2>
         <form action="/login" method="POST" style="text-align: center;">
             <label for="username">Username:</label>
