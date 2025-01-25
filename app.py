@@ -94,6 +94,7 @@ def get_food_suggestions(country=None, meal_type=None, diet=None, ingredients=No
 def login():
     return render_template('index.html')
 
+
 @app.route('/login', methods=['POST'])
 def login_user():
     username = request.form['username']
