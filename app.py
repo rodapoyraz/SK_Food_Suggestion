@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session
 import sqlite3
 import requests
 from fpdf import FPDF
@@ -8,9 +8,6 @@ app.secret_key = 'your_secret_key'
 API_KEY = 'a35c67528fe34873ba1f903dd1809b78'
 API_URL = 'https://api.spoonacular.com/recipes/complexSearch'
 
-USER_DATABASE = {
-    "ilovekebab": "1234"
-}
 
 def init_db():
     conn = sqlite3.connect('database.db')
@@ -43,6 +40,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def check_user(username, password):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -51,6 +49,7 @@ def check_user(username, password):
     conn.close()
     return user
 
+
 def create_user(username, password):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -58,72 +57,91 @@ def create_user(username, password):
     conn.commit()
     conn.close()
 
+
 def get_food_suggestions(country, meal_type):
     params = {
         'apiKey': API_KEY,
-        'cuisine': country,
-        'mealType': meal_type,
+        'cuisine': country if country else '',
+        'type': meal_type if meal_type else '',
         'number': 5
     }
     response = requests.get(API_URL, params=params)
     return response.json().get('results', [])
 
+
 @app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if username in USER_DATABASE and USER_DATABASE[username] == password:
-            session['user_id'] = username
-            return redirect('/main')
-        user = check_user(username, password)
-        if user:
-            session['user_id'] = user[0]
-            return redirect('/main')
-        return 'Invalid login, try again.'
     return render_template('login.html')
 
-@app.route('/signup', methods=['GET', 'POST'])
+
+@app.route('/login', methods=['POST'])
+def login_user():
+    username = request.form['username']
+    password = request.form['password']
+    user = check_user(username, password)
+    if user:
+        session['user_id'] = user[0]
+        return redirect('/main')
+    return 'Invalid login, try again.'
+
+
+@app.route('/signup')
 def signup():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        create_user(username, password)
-        return redirect('/login')
     return render_template('signup.html')
+
+
+@app.route('/signup', methods=['POST'])
+def signup_user():
+    username = request.form['username']
+    password = request.form['password']
+    create_user(username, password)
+    return redirect('/')
+
 
 @app.route('/main')
 def main_page():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     return render_template('main.html')
+
 
 @app.route('/kebabs')
 def kebabs():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     return render_template('kebabs.html')
+
 
 @app.route('/suggestions', methods=['GET', 'POST'])
 def suggestions():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
+    foods = []
+    message = None
+
     if request.method == 'POST':
         country = request.form['country']
         meal_type = request.form['meal_type']
+
+        # Primary search
         foods = get_food_suggestions(country, meal_type)
-        return render_template('suggestions.html', foods=foods)
-    return render_template('suggestions.html')
+
+        # If no results, attempt broader searches
+        if not foods:
+            message = f"No recipes found for {country} and {meal_type}. Showing broader results."
+            foods = get_food_suggestions(country, None)
+
+        if not foods:
+            message = f"No recipes found for {country}. Showing general recipes."
+            foods = get_food_suggestions(None, None)
+
+    return render_template('suggestions.html', foods=foods, message=message)
+
 
 @app.route('/favorites')
 def favorites():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT food_name FROM favorites WHERE user_id=?', (session['user_id'],))
@@ -131,10 +149,11 @@ def favorites():
     conn.close()
     return render_template('favorites.html', foods=foods)
 
+
 @app.route('/add_favorite', methods=['POST'])
 def add_favorite():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     food_name = request.form['food_name']
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -143,10 +162,11 @@ def add_favorite():
     conn.close()
     return redirect('/favorites')
 
+
 @app.route('/notes')
 def notes():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT note FROM notes WHERE user_id=?', (session['user_id'],))
@@ -154,10 +174,11 @@ def notes():
     conn.close()
     return render_template('notes.html', notes=notes)
 
+
 @app.route('/add_note', methods=['POST'])
 def add_note():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     note = request.form['note']
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -166,10 +187,11 @@ def add_note():
     conn.close()
     return redirect('/notes')
 
+
 @app.route('/delete_note', methods=['POST'])
 def delete_note():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     note = request.form['note']
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -177,6 +199,7 @@ def delete_note():
     conn.commit()
     conn.close()
     return redirect('/notes')
+
 
 @app.route('/download_pdf/<food_name>')
 def download_pdf(food_name):
@@ -187,10 +210,12 @@ def download_pdf(food_name):
     pdf.output(f"{food_name}.pdf")
     return redirect('/kebabs')
 
+
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
-    return redirect('/login')
+    return redirect('/')
+
 
 if __name__ == '__main__':
     init_db()

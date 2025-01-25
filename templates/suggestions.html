@@ -3,34 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suggestions</title>
+    <title>Food Suggestions</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            color: #4CAF50;
+        }
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .recipes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .recipe-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+        }
+        .recipe-card img {
+            width: 100%;
+            height: auto;
+        }
+        .recipe-card h3 {
+            font-size: 18px;
+            margin: 15px 0;
+        }
+        .recipe-card a {
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #FF5722;
+        }
+    </style>
 </head>
 <body>
     <h1>Food Suggestions</h1>
-    <form action="/suggestions" method="POST">
-        <label for="country">Country:</label>
-        <input type="text" name="country" required>
-        <br>
-        <label for="meal_type">Meal Type (Breakfast/Lunch/Dinner):</label>
-        <input type="text" name="meal_type" required>
-        <br>
+
+    <form method="POST" action="/suggestions">
+        <label for="country">Select Cuisine:</label>
+        <select name="country" id="country" required>
+            <option value="">-- Select Cuisine --</option>
+            <option value="American">American</option>
+            <option value="Italian">Italian</option>
+            <option value="Indian">Indian</option>
+            <option value="Mexican">Mexican</option>
+            <option value="Chinese">Chinese</option>
+            <option value="Japanese">Japanese</option>
+        </select>
+
+        <label for="meal_type">Select Meal Type:</label>
+        <select name="meal_type" id="meal_type" required>
+            <option value="">-- Select Meal Type --</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+        </select>
+
         <button type="submit">Get Suggestions</button>
     </form>
 
-    <h2>Suggested Recipes</h2>
-    {% if foods %}
-        <ul>
-        {% for food in foods %}
-            <li>{{ food.title }}
-                <form action="/add_favorite" method="POST" style="display:inline;">
-                    <input type="hidden" name="food_name" value="{{ food.title }}">
-                    <button type="submit">Add to Favorites</button>
-                </form>
-            </li>
+    {% if message %}
+        <p class="message">{{ message }}</p>
+    {% endif %}
+
+    <div class="recipes">
+        {% for recipe in foods %}
+            <div class="recipe-card">
+                <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
+                <h3>{{ recipe.title }}</h3>
+                <a href="{{ recipe.sourceUrl }}" target="_blank">View Recipe</a>
+            </div>
         {% endfor %}
-        </ul>
-    {% else %}
-        <p>No suggestions available.</p>
+    </div>
+
+    {% if not foods %}
+        <p style="text-align: center; font-size: 16px;">No recipes found. Try another combination!</p>
     {% endif %}
 </body>
 </html>
