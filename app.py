@@ -58,15 +58,41 @@ def create_user(username, password):
     conn.close()
 
 
-def get_food_suggestions(country, meal_type):
+def get_food_suggestions(country=None, meal_type=None, diet=None, ingredients=None, query=None):
     params = {
         'apiKey': API_KEY,
-        'cuisine': country if country else '',
-        'type': meal_type if meal_type else '',
-        'number': 5
+        'number': 10  # Increase results
     }
+
+    if country:
+        params['cuisine'] = country
+    if meal_type:
+        params['type'] = meal_type
+    if diet:
+        params['diet'] = diet
+    if ingredients:
+        params['includeIngredients'] = ingredients
+    if query:
+        params['query'] = query
+
     response = requests.get(API_URL, params=params)
-    return response.json().get('results', [])
+    results = response.json().get('results', [])
+
+    # Fetch detailed recipe information for each result
+    recipes = []
+    for recipe in results:
+        recipe_id = recipe.get('id')
+        recipe_details = requests.get(
+            f"https://api.spoonacular.com/recipes/{recipe_id}/information",
+            params={'apiKey': API_KEY}
+        ).json()
+        recipes.append({
+            'title': recipe_details.get('title', 'No Title'),
+            'image': recipe_details.get('image', ''),
+            'sourceUrl': recipe_details.get('sourceUrl', '#')
+        })
+
+    return recipes
 
 
 @app.route('/')
@@ -116,26 +142,18 @@ def kebabs():
 def suggestions():
     if 'user_id' not in session:
         return redirect('/')
-    foods = []
-    message = None
 
     if request.method == 'POST':
-        country = request.form['country']
-        meal_type = request.form['meal_type']
+        country = request.form.get('country')
+        meal_type = request.form.get('meal_type')
+        diet = request.form.get('diet')
+        ingredients = request.form.get('ingredients')
+        query = request.form.get('query')
 
-        # Primary search
-        foods = get_food_suggestions(country, meal_type)
+        recipes = get_food_suggestions(country, meal_type, diet, ingredients, query)
+        return render_template('suggestions.html', recipes=recipes)
 
-        # If no results, attempt broader searches
-        if not foods:
-            message = f"No recipes found for {country} and {meal_type}. Showing broader results."
-            foods = get_food_suggestions(country, None)
-
-        if not foods:
-            message = f"No recipes found for {country}. Showing general recipes."
-            foods = get_food_suggestions(None, None)
-
-    return render_template('suggestions.html', foods=foods, message=message)
+    return render_template('suggestions.html', recipes=[])
 
 
 @app.route('/favorites')
