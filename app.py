@@ -78,20 +78,15 @@ def get_food_suggestions(country=None, meal_type=None, diet=None, ingredients=No
     response = requests.get(API_URL, params=params)
     results = response.json().get('results', [])
 
-    # Fetch detailed recipe information for each result
-    recipes = []
-    for recipe in results:
-        recipe_id = recipe.get('id')
-        recipe_details = requests.get(
-            f"https://api.spoonacular.com/recipes/{recipe_id}/information",
-            params={'apiKey': API_KEY}
-        ).json()
-        recipes.append({
-            'title': recipe_details.get('title', 'No Title'),
-            'image': recipe_details.get('image', ''),
-            'sourceUrl': recipe_details.get('sourceUrl', '#')
-        })
-
+    # Simplify the results
+    recipes = [
+        {
+            'id': recipe.get('id'),
+            'title': recipe.get('title', 'No Title'),
+            'image': recipe.get('image', ''),
+        }
+        for recipe in results
+    ]
     return recipes
 
 
@@ -154,6 +149,26 @@ def suggestions():
         return render_template('suggestions.html', recipes=recipes)
 
     return render_template('suggestions.html', recipes=[])
+
+
+@app.route('/recipe/<int:recipe_id>')
+def recipe_details(recipe_id):
+    if 'user_id' not in session:
+        return redirect('/')
+
+    # Fetch recipe details from Spoonacular
+    response = requests.get(
+        f"https://api.spoonacular.com/recipes/{recipe_id}/information",
+        params={'apiKey': API_KEY}
+    )
+    recipe = response.json()
+
+    # Handle case where no recipe is found
+    if not recipe:
+        return "Recipe details not available.", 404
+
+    # Render the recipe details page
+    return render_template('recipe_details.html', recipe=recipe)
 
 
 @app.route('/favorites')

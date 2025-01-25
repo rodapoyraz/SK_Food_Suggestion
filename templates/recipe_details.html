@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ recipe.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        img {
+            max-width: 400px;
+        }
+        ul {
+            list-style-type: square;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ recipe.title }}</h1>
+    <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
+    <h2>Ingredients</h2>
+    <ul>
+        {% for ingredient in recipe.extendedIngredients %}
+            <li>{{ ingredient.original }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Instructions</h2>
+    {% if recipe.instructions %}
+        <p>{{ recipe.instructions | safe }}</p>
+    {% else %}
+        <p>Instructions are not available for this recipe.</p>
+    {% endif %}
+    <a href="/suggestions">Back to Suggestions</a>
+</body>
+</html>

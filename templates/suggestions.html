@@ -99,7 +99,7 @@
             <div class="recipe">
                 <h3>{{ recipe.title }}</h3>
                 <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
-                <p><a href="{{ recipe.sourceUrl }}" target="_blank">View Recipe</a></p>
+                 <p><a href="/recipe/{{ recipe.id }}" target="_blank">View Recipe</a></p>
                 <form method="POST" action="/add_favorite">
                     <input type="hidden" name="food_name" value="{{ recipe.title }}">
                     <button type="submit">Add to Favorites</button>
