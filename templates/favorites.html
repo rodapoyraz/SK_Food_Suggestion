@@ -3,16 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Favorites</title>
+    <title>Your Favorite Foods</title>
+    <style>
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #d3d3d3;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+
+        li {
+            background-color: #f1f1f1;
+            margin: 12px 0;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+
+        li:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-5px);
+        }
+
+
+        .no-favorites {
+            font-style: italic;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+
+        .list-container {
+            border-top: 2px solid #ddd;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Your Favorite Foods</h1>
-    <ul>
-    {% for food in foods %}
-        <li>{{ food[0] }}</li>
-    {% else %}
-        <li>No favorites yet.</li>
-    {% endfor %}
-    </ul>
+    <div class="container">
+        <h1>Your Favorite Foods</h1>
+        <div class="list-container">
+            <ul>
+            {% for food in foods %}
+                <li>{{ food[0] }}</li>
+            {% else %}
+                <li class="no-favorites">No favorites yet.</li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
 </body>
 </html>

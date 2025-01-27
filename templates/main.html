@@ -6,46 +6,95 @@
     <title>Main Page</title>
     <style>
         body {
-            font-family: Arial, sans-serif; /* Yazı tipi */
-            text-align: center; /* Sayfanın tamamını ortala */
             margin: 0;
             padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #d3d3d3;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Sayfa yüksekliğini tam doldur */
+            height: 100vh;
+            color: #333;
         }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 85%;
+            max-width: 900px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .container:hover {
+            transform: scale(1.05);
+        }
+
         h1 {
-            font-size: 3rem; /* Başlık büyüklüğünü arttır */
-            margin-bottom: 30px; /* Başlık ile menü arasında boşluk */
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #333;
+            text-transform: uppercase;
         }
+
         nav {
             display: flex;
-            justify-content: center; /* Menü öğelerini yatayda ortala */
-            gap: 20px; /* Menü öğeleri arasındaki boşluk */
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
+
         nav a {
-            font-size: 1.5rem; /* Menü bağlantılarını büyüt */
-            text-decoration: none; /* Alt çizgi kaldır */
-            color: #333; /* Metin rengini koyu yap */
-            padding: 10px 20px; /* Bağlantıların iç boşluklarını ayarla */
-            border-radius: 5px; /* Köşeleri yuvarlat */
-            transition: background-color 0.3s ease; /* Hover efektinin geçiş süresi */
+            font-size: 1rem;
+            text-decoration: none;
+            color: #fff;
+            background-color: #2c3e50;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
+
         nav a:hover {
-            background-color: #ddd; /* Hover durumunda arka plan rengi değişsin */
+            background-color: #34495e;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        nav a:active {
+            background-color: #1abc9c;
+            transform: translateY(2px);
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            nav a {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to the Secret Kebab</h1>
-    <nav>
-        <a href="/kebabs">Kebabs</a>
-        <a href="/suggestions">Suggestions</a>
-        <a href="/favorites">Favorites</a>
-        <a href="/notes">Notes</a>
-        <a href="/logout">Logout</a>
-    </nav>
+    <div class="container">
+        <h1>Welcome to the Secret Kebab</h1>
+        <nav>
+            <a href="/kebabs">Kebabs</a>
+            <a href="/suggestions">Suggestions</a>
+            <a href="/favorites">Favorites</a>
+            <a href="/notes">Notes</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </div>
 </body>
 </html>
