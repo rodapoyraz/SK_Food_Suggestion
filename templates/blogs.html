@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs</title>
+</head>
+<body>
+    <h1>Blog Posts</h1>
+    <a href="/add_blog">Add New Blog</a>
+    <ul>
+        {% for blog in blogs %}
+        <li>
+            <h2><a href="/blog/{{ blog[0] }}">{{ blog[1] }}</a></h2>
+            <p>{{ blog[2][:100] }}...</p>
+            <small>By {{ blog[4] }} on {{ blog[3] }}</small>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

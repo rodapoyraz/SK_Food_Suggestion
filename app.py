@@ -37,6 +37,17 @@ def init_db():
         note TEXT,
         FOREIGN KEY(user_id) REFERENCES users(id)
     )''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS blogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -131,6 +142,38 @@ def kebabs():
     if 'user_id' not in session:
         return redirect('/')
     return render_template('kebabs.html')
+
+@app.route('/blogs')
+def blogs():
+    if 'user_id' not in session:
+        return redirect('/')
+    return render_template('blogs.html')
+
+
+@app.route('/add_blog', methods=['GET', 'POST'])
+def add_blog():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        # Blogu veritabanına ekleyelim
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO blogs (title, content) VALUES (?, ?)', (title, content))
+        conn.commit()
+        conn.close()
+
+        return redirect('/add_blog')  # Blog eklendikten sonra sayfayı yenile
+
+    # Veritabanındaki blogları alalım
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT title, content FROM blogs')
+    blogs = cursor.fetchall()
+    conn.close()
+
+    # Blogları HTML şablonuna gönder
+    return render_template('add_blog.html', blogs=blogs)
 
 
 @app.route('/suggestions', methods=['GET', 'POST'])
