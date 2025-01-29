@@ -37,6 +37,19 @@ def init_db():
         note TEXT,
         FOREIGN KEY(user_id) REFERENCES users(id)
     )''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS blogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )
+    ''')
+
+
+
     conn.commit()
     conn.close()
 
@@ -132,6 +145,51 @@ def kebabs():
         return redirect('/')
     return render_template('kebabs.html')
 
+@app.route('/blogs')
+def blog():
+    # Veritabanındaki tüm blogları al
+    try:
+        conn = sqlite3.connect('database.db')  # Veritabanına bağlan
+        cursor = conn.cursor()
+        cursor.execute('SELECT title, content FROM blogs')  # Blogları çek
+        blogs = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Veritabanı hatası: {e}")  # Hata varsa terminale yazdır
+        blogs = []  # Hata durumunda boş liste döndür
+    finally:
+        conn.close()  # Veritabanı bağlantısını kapat
+
+    # Blogları HTML şablonuna gönder
+    return render_template('blogs.html', blogs=blogs)
+
+
+
+
+@app.route('/add_blog', methods=['GET', 'POST'])
+def add_blog():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        # Blogu veritabanına ekleyelim
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO blogs (title, content) VALUES (?, ?)', (title, content))
+        conn.commit()
+        conn.close()
+
+        return redirect('/add_blog')  # Blog eklendikten sonra sayfayı yenile
+
+    # Veritabanındaki blogları alalım
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT title, content FROM blogs')
+    blogs = cursor.fetchall()
+    conn.close()
+
+    # Blogları HTML şablonuna gönder
+    return render_template('add_blog.html', blogs=blogs)
+
 
 @app.route('/suggestions', methods=['GET', 'POST'])
 def suggestions():
@@ -149,6 +207,8 @@ def suggestions():
         return render_template('suggestions.html', recipes=recipes)
 
     return render_template('suggestions.html', recipes=[])
+
+
 
 
 @app.route('/recipe/<int:recipe_id>')
@@ -248,6 +308,7 @@ def download_pdf(food_name):
 def logout():
     session.pop('user_id', None)
     return redirect('/')
+
 
 
 if __name__ == '__main__':
