@@ -48,6 +48,8 @@ def init_db():
     )
     ''')
 
+
+
     conn.commit()
     conn.close()
 
@@ -144,10 +146,23 @@ def kebabs():
     return render_template('kebabs.html')
 
 @app.route('/blogs')
-def blogs():
-    if 'user_id' not in session:
-        return redirect('/')
-    return render_template('blogs.html')
+def blog():
+    # Veritabanındaki tüm blogları al
+    try:
+        conn = sqlite3.connect('database.db')  # Veritabanına bağlan
+        cursor = conn.cursor()
+        cursor.execute('SELECT title, content FROM blogs')  # Blogları çek
+        blogs = cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"Veritabanı hatası: {e}")  # Hata varsa terminale yazdır
+        blogs = []  # Hata durumunda boş liste döndür
+    finally:
+        conn.close()  # Veritabanı bağlantısını kapat
+
+    # Blogları HTML şablonuna gönder
+    return render_template('blogs.html', blogs=blogs)
+
+
 
 
 @app.route('/add_blog', methods=['GET', 'POST'])
@@ -192,6 +207,8 @@ def suggestions():
         return render_template('suggestions.html', recipes=recipes)
 
     return render_template('suggestions.html', recipes=[])
+
+
 
 
 @app.route('/recipe/<int:recipe_id>')
@@ -291,6 +308,7 @@ def download_pdf(food_name):
 def logout():
     session.pop('user_id', None)
     return redirect('/')
+
 
 
 if __name__ == '__main__':
