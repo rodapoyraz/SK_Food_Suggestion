@@ -7,7 +7,7 @@
     <style>
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #d3d3d3;
             color: #333;
             margin: 0;
@@ -18,76 +18,122 @@
             height: 100vh;
         }
 
-
+        /* Ana Konteyner */
         .container {
-            background-color: #ffffff;
-            padding: 30px 40px;
-            border-radius: 10px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             width: 90%;
-            max-width: 800px;
+            max-width: 600px;
             text-align: center;
+            transition: transform 0.3s ease-in-out;
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: 2em;
             color: #2c3e50;
             margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
 
-
+        /* Liste ve Listeler */
         ul {
             list-style-type: none;
             padding: 0;
-            font-size: 1.2em;
             margin-top: 20px;
         }
 
         li {
-            background-color: #f1f1f1;
+            background: #f9f9f9;
             margin: 12px 0;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: background-color 0.3s ease, transform 0.2s ease;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-
 
         li:hover {
-            background-color: #e0e0e0;
-            transform: translateY(-5px);
+            background: #e0e0e0;
+            transform: scale(1.02);
         }
 
+        /* Silme Butonu */
+        .remove-btn {
+            background: #ff5c5c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            font-weight: bold;
+            box-shadow: 0 3px 8px rgba(255, 75, 43, 0.3);
+        }
+
+        .remove-btn:hover {
+            background: #e60000;
+            transform: scale(1.1);
+        }
 
         .no-favorites {
             font-style: italic;
-            color: #999;
-            font-size: 1.1em;
+            color: #666;
+            font-size: 1.2em;
         }
 
-
-        .list-container {
-            border-top: 2px solid #ddd;
-            margin-top: 20px;
-            padding-top: 20px;
+        /* Silme Animasyonu */
+        .fade-out {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
         }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Your Favorite Foods</h1>
-        <div class="list-container">
-            <ul>
+        <h1>Your Favorite Foods 🍽️</h1>
+        <ul id="favorites-list">
             {% for food in foods %}
-                <li>{{ food[0] }}</li>
+                <li>
+                    <span>{{ food[0] }}</span>
+                    <button class="remove-btn" onclick="removeFavorite(this, '{{ food[0] }}')">Remove</button>
+                </li>
             {% else %}
                 <li class="no-favorites">No favorites yet.</li>
             {% endfor %}
-            </ul>
-        </div>
+        </ul>
     </div>
+
+    <script>
+        function removeFavorite(button, foodName) {
+            let listItem = button.parentElement;
+
+
+            listItem.classList.add("fade-out");
+
+            setTimeout(() => {
+                listItem.remove();
+
+
+                fetch('/remove_favorite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ food: foodName })
+                })
+                .then(response => response.json())
+                .then(data => console.log(data.message))
+                .catch(error => console.error('Error:', error));
+            }, 300); // 0.3 saniye animasyon süresi
+        }
+    </script>
 </body>
 </html>

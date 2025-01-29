@@ -4,12 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ blog[0] }}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+        .blog-title {
+            color: #333;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .blog-meta {
+            color: #777;
+            font-size: 14px;
+        }
+        .back-btn {
+            margin-top: 20px;
+        }
+        .like-btn {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .like-btn:hover {
+            color: #0056b3;
+        }
+        .like-count {
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ blog[0] }}</h1>
-    <p>{{ blog[1] }}</p>
-    <small>By {{ blog[3] }} on {{ blog[2] }}</small>
-    <br>
-    <a href="/blogs">Back to Blogs</a>
+
+    <div class="container">
+        <h1 class="blog-title">{{ blog[0] }}</h1>
+        <p class="blog-meta">By <strong>{{ blog[3] }}</strong> on {{ blog[2] }}</p>
+        <hr>
+        <p>{{ blog[1] }}</p>
+
+
+        <button class="like-btn" onclick="likeBlog()">👍 Like <span class="like-count">0</span></button>
+
+
+        <a href="/blogs" class="btn btn-secondary back-btn">Back to Blogs</a>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Blog Beğeni Fonksiyonu
+        function likeBlog() {
+            let countElement = document.querySelector(".like-count");
+            let count = parseInt(countElement.textContent);
+            countElement.textContent = count + 1;
+        }
+    </script>
+
 </body>
 </html>
