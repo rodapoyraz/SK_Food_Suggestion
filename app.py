@@ -327,6 +327,8 @@ def add_recipe():
     return redirect(url_for('suggestions'))
 
 
+
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
