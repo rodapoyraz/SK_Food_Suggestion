@@ -2,114 +2,239 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Food Suggestions</title>
     <style>
+        /* General reset */
+        body, h1, h2, p, form, select, input, button {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
         body {
-            background-color: #d3d3d3;
-            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            color: #003366;  /* Dark blue text */
+            line-height: 1.6;
             padding: 20px;
+            font-size: 1.1rem;  /* Larger font for text */
         }
-        form {
+        h1, h2 {
+            text-align: center;
             margin-bottom: 20px;
+            color: #003366;  /* Dark blue text for headings */
+            font-size: 2.5rem;  /* Larger heading font */
         }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form layout */
+        form {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);  /* First row: 3 filters */
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .second-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;  /* Second row: 2 filters */
+            gap: 20px;
+            margin-top: 20px;
+        }
+
         label {
             font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.2rem;  /* Larger font for labels */
+            color: #003366;  /* Dark blue text for labels */
         }
+
         select, input[type="text"] {
-            padding: 8px;
-            width: 250px;
-            margin-top: 5px;
+            padding: 12px;
+            font-size: 1.1rem;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
         }
+
+        input[type="text"] {
+            background-color: #f9f9f9;
+        }
+
+        /* Submit button */
         button {
-            padding: 10px;
-            margin-top: 10px;
-            background-color: #4CAF50;
+            padding: 15px;
+            font-size: 1.3rem;  /* Larger font for button */
+            background-color: #003366;  /* Dark blue button */
             color: white;
             border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 200px;
+            margin: 30px auto 0; /* Center the button */
+            display: block;
+        }
+
+        button:hover {
+            background-color: #002244;  /* Darker blue on hover */
+        }
+
+        /* Recipe section */
+        .recipes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .recipe {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .recipe:hover {
+            transform: translateY(-10px);
+        }
+
+        .recipe img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .recipe h3 {
+            margin-bottom: 10px;
+            color: #003366;  /* Dark blue text for recipe titles */
+            font-size: 1.5rem;  /* Larger font for recipe titles */
+        }
+
+        .recipe a {
+            text-decoration: none;
+            color: #003366;  /* Dark blue for links */
+            font-size: 1.2rem;
+        }
+
+        .recipe a:hover {
+            text-decoration: underline;
+        }
+
+        .favorite-btn {
+            margin-top: 10px;
+        }
+
+        .favorite-btn button {
+            padding: 8px 20px;
+            background-color: #003366;  /* Dark blue button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .favorite-btn button:hover {
+            background-color: #002244;  /* Darker blue on hover */
         }
-        .recipe {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-top: 15px;
+
+        /* No recipes found message */
+        .no-recipes {
+            text-align: center;
+            font-size: 1.3rem;  /* Larger font for no recipes message */
+            color: #888;
         }
-        .recipe img {
-            max-width: 200px;
-        }
+
     </style>
 </head>
 <body>
-    <h1>Advanced Food Suggestions</h1>
 
-    <form method="POST" action="/suggestions">
-        <div>
-            <label for="country">Cuisine (Optional):</label>
-            <select name="country" id="country">
-                <option value="">Any</option>
-                <option value="American">American</option>
-                <option value="Italian">Italian</option>
-                <option value="Indian">Indian</option>
-                <option value="Mexican">Mexican</option>
-                <option value="Chinese">Chinese</option>
-                <option value="Japanese">Japanese</option>
+    <div class="container">
+        <h1>Advanced Food Suggestions</h1>
 
-            </select>
-        </div>
+        <form method="POST" action="/suggestions">
+            <div>
+                <label for="country">Cuisine (Optional):</label>
+                <select name="country" id="country">
+                    <option value="">Any</option>
+                    <option value="American">American</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Indian">Indian</option>
+                    <option value="Mexican">Mexican</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="Japanese">Japanese</option>
+                </select>
+            </div>
 
-        <div>
-            <label for="meal_type">Meal Type (Optional):</label>
-            <select name="meal_type" id="meal_type">
-                <option value="">Any</option>
-                <option value="Breakfast">Breakfast</option>
-                <option value="Lunch">Lunch</option>
-                <option value="Dinner">Dinner</option>
-            </select>
-        </div>
+            <div>
+                <label for="meal_type">Meal Type (Optional):</label>
+                <select name="meal_type" id="meal_type">
+                    <option value="">Any</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                </select>
+            </div>
 
-        <div>
-            <label for="diet">Diet (Optional):</label>
-            <select name="diet" id="diet">
-                <option value="">Any</option>
-                <option value="Vegetarian">Vegetarian</option>
-                <option value="Vegan">Vegan</option>
-                <option value="Ketogenic">Ketogenic</option>
-                <option value="Gluten Free">Gluten Free</option>
-            </select>
-        </div>
+            <div>
+                <label for="diet">Diet (Optional):</label>
+                <select name="diet" id="diet">
+                    <option value="">Any</option>
+                    <option value="Vegetarian">Vegetarian</option>
+                    <option value="Vegan">Vegan</option>
+                    <option value="Ketogenic">Ketogenic</option>
+                    <option value="Gluten Free">Gluten Free</option>
+                </select>
+            </div>
+        </form>
 
-        <div>
-            <label for="ingredients">Ingredients (Optional, comma-separated):</label>
-            <input type="text" name="ingredients" id="ingredients" placeholder="e.g., chicken, rice">
-        </div>
+        <div class="second-row">
+            <div>
+                <label for="ingredients">Ingredients (Optional, comma-separated):</label>
+                <input type="text" name="ingredients" id="ingredients" placeholder="e.g., chicken, rice">
+            </div>
 
-        <div>
-            <label for="query">Search by Keywords (Optional):</label>
-            <input type="text" name="query" id="query" placeholder="e.g., chicken curry">
+            <div>
+                <label for="query">Search by Keywords (Optional):</label>
+                <input type="text" name="query" id="query" placeholder="e.g., chicken curry">
+            </div>
         </div>
 
         <button type="submit">Get Suggestions</button>
-    </form>
 
-    <h2>Recipes</h2>
-    {% if recipes %}
-        <div>
-        {% for recipe in recipes %}
-            <div class="recipe">
-                <h3>{{ recipe.title }}</h3>
-                <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
-                 <p><a href="/recipe/{{ recipe.id }}" target="_blank">View Recipe</a></p>
-                <form method="POST" action="/add_favorite">
-                    <input type="hidden" name="food_name" value="{{ recipe.title }}">
-                    <button type="submit">Add to Favorites</button>
-                </form>
-            </div>
-        {% endfor %}
+        <h2>Recipes</h2>
+
+        <div class="recipes-container">
+            {% if recipes %}
+                {% for recipe in recipes %}
+                    <div class="recipe">
+                        <h3>{{ recipe.title }}</h3>
+                        <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
+                        <p><a href="/recipe/{{ recipe.id }}" target="_blank">View Recipe</a></p>
+                        <div class="favorite-btn">
+                            <form method="POST" action="/add_favorite">
+                                <input type="hidden" name="food_name" value="{{ recipe.title }}">
+                                <button type="submit">Add to Favorites</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-recipes">No recipes found for this combination. Try adjusting the filters!</p>
+            {% endif %}
         </div>
-    {% else %}
-        <p>No recipes found for this combination. Try adjusting the filters!</p>
-    {% endif %}
+    </div>
+
 </body>
 </html>
