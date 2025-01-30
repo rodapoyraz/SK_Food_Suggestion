@@ -11,18 +11,16 @@
             padding: 0;
             font-family: 'Arial', sans-serif;
         }
+
         body {
             background-color: #f4f7fc;
             color: #003366;  /* Dark blue text */
             line-height: 1.6;
-            padding: 20px;
+            padding: 0; /* Remove padding to make sure container stretches to bottom */
             font-size: 1.1rem;  /* Larger font for text */
-        }
-        h1, h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #003366;  /* Dark blue text for headings */
-            font-size: 2.5rem;  /* Larger heading font */
+            min-height: 100vh;  /* Ensure body takes full height */
+            display: flex;
+            flex-direction: column;
         }
 
         /* Main Container */
@@ -33,6 +31,7 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex: 1;  /* Allow the container to stretch to fill remaining space */
         }
 
         /* Form layout */
@@ -156,6 +155,44 @@
             color: #888;
         }
 
+        /* User recipe submission section */
+        .add-recipe-container {
+            margin-top: 40px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .add-recipe-container form {
+            display: block;
+            margin-top: 20px;
+        }
+
+        .add-recipe-container input[type="text"],
+        .add-recipe-container input[type="file"],
+        .add-recipe-container textarea {
+            padding: 12px;
+            font-size: 1.1rem;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .add-recipe-container button {
+            background-color: #003366;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .add-recipe-container button:hover {
+            background-color: #002244;
+        }
     </style>
 </head>
 <body>
@@ -163,6 +200,7 @@
     <div class="container">
         <h1>Advanced Food Suggestions</h1>
 
+        <!-- Filters Form (existing filters) -->
         <form method="POST" action="/suggestions">
             <div>
                 <label for="country">Cuisine (Optional):</label>
@@ -197,23 +235,21 @@
                     <option value="Gluten Free">Gluten Free</option>
                 </select>
             </div>
+
+            <div class="second-row">
+                <div>
+                    <label for="ingredients">Ingredients (Optional, comma-separated):</label>
+                    <input type="text" name="ingredients" id="ingredients" placeholder="e.g., chicken, rice">
+                </div>
+
+                <div>
+                    <label for="query">Search by Keywords (Optional):</label>
+                    <input type="text" name="query" id="query" placeholder="e.g., chicken curry">
+                </div>
+            </div>
+
+            <button type="submit">Get Suggestions</button>
         </form>
-
-        <div class="second-row">
-            <div>
-                <label for="ingredients">Ingredients (Optional, comma-separated):</label>
-                <input type="text" name="ingredients" id="ingredients" placeholder="e.g., chicken, rice">
-            </div>
-
-            <div>
-                <label for="query">Search by Keywords (Optional):</label>
-                <input type="text" name="query" id="query" placeholder="e.g., chicken curry">
-            </div>
-        </div>
-
-        <button type="submit">Get Suggestions</button>
-
-        <h2>Recipes</h2>
 
         <div class="recipes-container">
             {% if recipes %}
@@ -233,6 +269,17 @@
             {% else %}
                 <p class="no-recipes">No recipes found for this combination. Try adjusting the filters!</p>
             {% endif %}
+        </div>
+
+        <!-- Add User Recipe Section -->
+        <div class="add-recipe-container">
+            <h2>Submit Your Own Recipe</h2>
+            <form method="POST" action="/add_recipe" enctype="multipart/form-data">
+                <input type="text" name="title" placeholder="Recipe Title" required><br>
+                <textarea name="ingredients" placeholder="Ingredients (comma-separated)" required></textarea><br>
+                <input type="file" name="image"><br>
+                <button type="submit">Submit Recipe</button>
+            </form>
         </div>
     </div>
 

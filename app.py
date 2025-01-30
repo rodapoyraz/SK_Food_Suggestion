@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, session, jsonify
+from flask import Flask, request, render_template, redirect, session, jsonify, url_for
 import sqlite3
 import requests
 from fpdf import FPDF
@@ -312,7 +312,19 @@ def delete_note():
     return redirect('/notes')
 
 
+@app.route('/add_recipe', methods=['POST'])
+def add_recipe():
+    title = request.form['title']
+    ingredients = request.form['ingredients']
+    image = request.files['image']
 
+    # Save image and other recipe details in the database
+    new_recipe = Recipe(title=title, ingredients=ingredients, image=image.filename)
+    db.session.add(new_recipe)
+    db.session.commit()
+
+    # Redirect to suggestions page or display a confirmation
+    return redirect(url_for('suggestions'))
 
 
 if __name__ == '__main__':
