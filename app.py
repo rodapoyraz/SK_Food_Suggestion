@@ -9,6 +9,7 @@ API_KEY = 'a35c67528fe34873ba1f903dd1809b78'
 API_URL = 'https://api.spoonacular.com/recipes/complexSearch'
 
 
+
 def init_db():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -311,21 +312,16 @@ def delete_note():
     conn.close()
     return redirect('/notes')
 
-
 @app.route('/add_recipe', methods=['POST'])
 def add_recipe():
+    # Handle the recipe form submission logic here
     title = request.form['title']
     ingredients = request.form['ingredients']
     image = request.files['image']
 
-    # Save image and other recipe details in the database
-    new_recipe = Recipe(title=title, ingredients=ingredients, image=image.filename)
-    db.session.add(new_recipe)
-    db.session.commit()
-
-    # Redirect to suggestions page or display a confirmation
-    return redirect(url_for('suggestions'))
-
+    # You can process the recipe submission here (e.g., save to database)
+    # Redirect or return a response
+    return redirect(url_for('suggestions'))  # Redirect back to the suggestions page or wherever appropriate
 
 
 
