@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, session, jsonify
 import sqlite3
 import requests
 from fpdf import FPDF
@@ -19,22 +19,9 @@ def init_db():
         password TEXT NOT NULL
     )''')
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS preferences (
-        user_id INTEGER,
-        country TEXT,
-        meal_type TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )''')
-    cursor.execute('''
     CREATE TABLE IF NOT EXISTS favorites (
         user_id INTEGER,
         food_name TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )''')
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS notes (
-        user_id INTEGER,
-        note TEXT,
         FOREIGN KEY(user_id) REFERENCES users(id)
     )''')
     cursor.execute('''
@@ -47,26 +34,12 @@ def init_db():
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     ''')
-
-
-
-    conn.commit()
-    conn.close()
-
-
-def check_user(username, password):
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE username=? AND password=?', (username, password))
-    user = cursor.fetchone()
-    conn.close()
-    return user
-
-
-def create_user(username, password):
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS notes (
+        user_id INTEGER,
+        note TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )''')
     conn.commit()
     conn.close()
 
@@ -74,9 +47,8 @@ def create_user(username, password):
 def get_food_suggestions(country=None, meal_type=None, diet=None, ingredients=None, query=None):
     params = {
         'apiKey': API_KEY,
-        'number': 10  # Increase results
+        'number': 10
     }
-
     if country:
         params['cuisine'] = country
     if meal_type:
@@ -89,9 +61,11 @@ def get_food_suggestions(country=None, meal_type=None, diet=None, ingredients=No
         params['query'] = query
 
     response = requests.get(API_URL, params=params)
+    if response.status_code != 200:
+        return []
+
     results = response.json().get('results', [])
 
-    # Simplify the results
     recipes = [
         {
             'id': recipe.get('id'),
@@ -112,24 +86,35 @@ def login():
 def login_user():
     username = request.form['username']
     password = request.form['password']
-    user = check_user(username, password)
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM users WHERE username=? AND password=?', (username, password))
+    user = cursor.fetchone()
+    conn.close()
+
     if user:
         session['user_id'] = user[0]
         return redirect('/main')
+
     return 'Invalid login, try again.'
 
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+        conn.commit()
+        conn.close()
+
+        return redirect('/')
+
     return render_template('signup.html')
-
-
-@app.route('/signup', methods=['POST'])
-def signup_user():
-    username = request.form['username']
-    password = request.form['password']
-    create_user(username, password)
-    return redirect('/')
 
 
 @app.route('/main')
@@ -139,56 +124,51 @@ def main_page():
     return render_template('main.html')
 
 
-@app.route('/kebabs')
-def kebabs():
+@app.route('/favorites')
+def favorites():
     if 'user_id' not in session:
         return redirect('/')
-    return render_template('kebabs.html')
 
-@app.route('/blogs')
-def blog():
-    # Veritabanındaki tüm blogları al
-    try:
-        conn = sqlite3.connect('database.db')  # Veritabanına bağlan
-        cursor = conn.cursor()
-        cursor.execute('SELECT title, content FROM blogs')  # Blogları çek
-        blogs = cursor.fetchall()
-    except sqlite3.Error as e:
-        print(f"Veritabanı hatası: {e}")  # Hata varsa terminale yazdır
-        blogs = []  # Hata durumunda boş liste döndür
-    finally:
-        conn.close()  # Veritabanı bağlantısını kapat
-
-    # Blogları HTML şablonuna gönder
-    return render_template('blogs.html', blogs=blogs)
-
-
-
-
-@app.route('/add_blog', methods=['GET', 'POST'])
-def add_blog():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        content = request.form.get('content')
-
-        # Blogu veritabanına ekleyelim
-        conn = sqlite3.connect('database.db')
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO blogs (title, content) VALUES (?, ?)', (title, content))
-        conn.commit()
-        conn.close()
-
-        return redirect('/add_blog')  # Blog eklendikten sonra sayfayı yenile
-
-    # Veritabanındaki blogları alalım
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT title, content FROM blogs')
-    blogs = cursor.fetchall()
+    cursor.execute('SELECT food_name FROM favorites WHERE user_id=?', (session['user_id'],))
+    foods = cursor.fetchall()
     conn.close()
 
-    # Blogları HTML şablonuna gönder
-    return render_template('add_blog.html', blogs=blogs)
+    return render_template('favorites.html', foods=foods)
+
+
+@app.route('/add_favorite', methods=['POST'])
+def add_favorite():
+    if 'user_id' not in session:
+        return redirect('/')
+
+    food_name = request.form.get('food_name')
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO favorites (user_id, food_name) VALUES (?, ?)', (session['user_id'], food_name))
+    conn.commit()
+    conn.close()
+
+    return redirect('/favorites')
+
+@app.route('/remove_favorite', methods=['POST'])
+def remove_favorite():
+    if 'user_id' not in session:
+        return redirect('/')
+
+    food_name = request.json.get('food')
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM favorites WHERE user_id=? AND food_name=?', (session['user_id'], food_name))
+    conn.commit()
+    conn.close()
+
+    return {"message": f"'{food_name}' favorilerden kaldırıldı!"}, 200
+
+
 
 
 @app.route('/suggestions', methods=['GET', 'POST'])
@@ -209,90 +189,77 @@ def suggestions():
     return render_template('suggestions.html', recipes=[])
 
 
-
-
 @app.route('/recipe/<int:recipe_id>')
 def recipe_details(recipe_id):
     if 'user_id' not in session:
         return redirect('/')
 
-    # Fetch recipe details from Spoonacular
     response = requests.get(
         f"https://api.spoonacular.com/recipes/{recipe_id}/information",
         params={'apiKey': API_KEY}
     )
     recipe = response.json()
 
-    # Handle case where no recipe is found
     if not recipe:
         return "Recipe details not available.", 404
 
-    # Render the recipe details page
     return render_template('recipe_details.html', recipe=recipe)
 
 
-@app.route('/favorites')
-def favorites():
-    if 'user_id' not in session:
-        return redirect('/')
+@app.route('/blogs')
+def blog():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT food_name FROM favorites WHERE user_id=?', (session['user_id'],))
-    foods = cursor.fetchall()
+    cursor.execute('SELECT title, content FROM blogs')
+    blogs = cursor.fetchall()
     conn.close()
-    return render_template('favorites.html', foods=foods)
+
+    return render_template('blogs.html', blogs=blogs)
 
 
-@app.route('/add_favorite', methods=['POST'])
-def add_favorite():
+@app.route('/add_blog', methods=['GET', 'POST'])
+def add_blog():
     if 'user_id' not in session:
         return redirect('/')
-    food_name = request.form['food_name']
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO blogs (user_id, title, content) VALUES (?, ?, ?)',
+                       (session['user_id'], title, content))
+        conn.commit()
+        conn.close()
+
+        return redirect('/blogs')
+
+    return render_template('add_blog.html')
+
+@app.route('/delete_blog', methods=['POST'])
+def delete_blog():
+    if 'user_id' not in session:
+        return redirect('/')
+
+    title = request.form.get('title')
+
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO favorites (user_id, food_name) VALUES (?, ?)', (session['user_id'], food_name))
+    cursor.execute('DELETE FROM blogs WHERE title = ?', (title,))
     conn.commit()
     conn.close()
-    return redirect('/favorites')
+
+    return redirect('/blogs')
 
 
-@app.route('/notes')
-def notes():
+
+
+@app.route('/kebabs')
+def kebabs():
     if 'user_id' not in session:
         return redirect('/')
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT note FROM notes WHERE user_id=?', (session['user_id'],))
-    notes = cursor.fetchall()
-    conn.close()
-    return render_template('notes.html', notes=notes)
-
-
-@app.route('/add_note', methods=['POST'])
-def add_note():
-    if 'user_id' not in session:
-        return redirect('/')
-    note = request.form['note']
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO notes (user_id, note) VALUES (?, ?)', (session['user_id'], note))
-    conn.commit()
-    conn.close()
-    return redirect('/notes')
-
-
-@app.route('/delete_note', methods=['POST'])
-def delete_note():
-    if 'user_id' not in session:
-        return redirect('/')
-    note = request.form['note']
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM notes WHERE user_id=? AND note=?', (session['user_id'], note))
-    conn.commit()
-    conn.close()
-    return redirect('/notes')
-
+    return render_template('kebabs.html')
 
 @app.route('/download_pdf/<food_name>')
 def download_pdf(food_name):
@@ -308,6 +275,43 @@ def download_pdf(food_name):
 def logout():
     session.pop('user_id', None)
     return redirect('/')
+
+@app.route('/notes')
+def notes():
+    if 'user_id' not in session:
+        return redirect('/')
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT note FROM notes WHERE user_id=?', (session['user_id'],))
+    notes = cursor.fetchall()
+    conn.close()
+    return render_template('notes.html', notes=notes)
+
+@app.route('/add_note', methods=['POST'])
+def add_note():
+    if 'user_id' not in session:
+        return redirect('/')
+    note = request.form['note']
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO notes (user_id, note) VALUES (?, ?)', (session['user_id'], note))
+    conn.commit()
+    conn.close()
+    return redirect('/notes')
+
+@app.route('/delete_note', methods=['POST'])
+def delete_note():
+    if 'user_id' not in session:
+        return redirect('/')
+    note = request.form['note']
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM notes WHERE user_id=? AND note=?', (session['user_id'], note))
+    conn.commit()
+    conn.close()
+    return redirect('/notes')
+
+
 
 
 

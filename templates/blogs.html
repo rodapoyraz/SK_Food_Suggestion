@@ -4,12 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Blogs</title>
-    <!-- Bootstrap CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
             font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
         }
         .blog-card {
             border: 1px solid #ddd;
@@ -19,6 +30,10 @@
             margin-bottom: 20px;
             background-color: #fff;
             position: relative;
+            transition: transform 0.3s ease;
+        }
+        .blog-card:hover {
+            transform: scale(1.02);
         }
         .blog-card h2 {
             color: #333;
@@ -45,23 +60,42 @@
             right: 20px;
             z-index: 10;
         }
+        .like-btn {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .like-btn:hover {
+            color: #0056b3;
+        }
+        .like-count {
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">All Blogs</h1>
 
+
+        <input type="text" id="blogSearch" placeholder="Search blog..." class="search-input">
+
         {% if blogs %}
-            <div class="row">
+            <div class="row" id="blogContainer">
                 {% for blog in blogs %}
-                    <div class="col-md-6">
+                    <div class="col-md-6 blog-card-container">
                         <div class="blog-card">
-                            <h2>{{ blog[0] }}</h2>
-                            <p>{{ blog[1] }}</p>
+                            <h2 class="blog-title">{{ blog[0] }}</h2>
+                            <p class="blog-content">{{ blog[1] }}</p>
                             <form action="/delete_blog" method="post" style="display: inline;">
                                 <input type="hidden" name="title" value="{{ blog[0] }}">
                                 <button class="delete-btn" title="Delete Blog">&times;</button>
                             </form>
+                            <button class="like-btn" onclick="likeBlog(this)">👍 Like <span class="like-count">0</span></button>
                         </div>
                     </div>
                 {% endfor %}
@@ -75,7 +109,30 @@
         <a href="/add_blog" class="btn btn-primary add-blog-btn">Add a New Blog</a>
     </div>
 
-    <!-- Bootstrap JS Bundle -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+        function searchBlogs() {
+            let input = document.getElementById('blogSearch').value.toLowerCase();
+            let blogs = document.querySelectorAll('.blog-card-container');
+
+            blogs.forEach(blog => {
+                let title = blog.querySelector('.blog-title').textContent.toLowerCase();
+                let content = blog.querySelector('.blog-content').textContent.toLowerCase();
+                blog.style.display = (title.includes(input) || content.includes(input)) ? 'block' : 'none';
+            });
+        }
+
+        document.getElementById('blogSearch').addEventListener('keyup', searchBlogs);
+
+
+        function likeBlog(button) {
+            let countElement = button.querySelector('.like-count');
+            let count = parseInt(countElement.textContent);
+            countElement.textContent = count + 1;
+        }
+    </script>
 </body>
 </html>
